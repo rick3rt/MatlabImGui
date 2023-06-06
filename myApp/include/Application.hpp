@@ -1,14 +1,15 @@
-#ifndef APP_HPP_
-#define APP_HPP_
+#ifndef APPLICATION_HPP_
+#define APPLICATION_HPP_
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// #define IMGUI_USER_CONFIG "my_imgui_config.h"
 #include <imgui.h>
 // #include <implot.h>
 #include <map>
 #include <string>
+
+// #include "FrameBuffer.hpp"
 
 /// Macro to disable console on Windows
 // #if defined(_WIN32) && defined(APP_NO_CONSOLE)
@@ -22,13 +23,14 @@ class App
     // Constructor.
     App(std::string title, int w, int h, int argc, char const *argv[]);
     // Destructor.
-    virtual ~App();
+    ~App();
     // Called at top of run
     virtual void Start() {}
     // Update, called once per frame.
-    virtual void Update() { /*implement me*/ }
+    virtual void Update() {}
     // Runs the app.
     void Run();
+
     // Get window size
     ImVec2 GetWindowSize() const;
 
@@ -38,4 +40,4 @@ class App
     bool UsingDGPU;                        // using discrete gpu (laptops only)
 };
 
-#endif //! APP_HPP_
+#endif //! APPLICATION_HPP_

@@ -5,7 +5,6 @@ project(CMakeImGuiOpenGL VERSION 1.0.0 LANGUAGES CXX)
 # ########################################################################################
 # User variables
 set(VENDOR_PATH "${PROJECT_SOURCE_DIR}/vendor")
-set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/resource")
 
 # message("VENDOR_PATH = ${VENDOR_PATH}")
 
@@ -38,4 +37,5 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
 
 # ########################################################################################
 add_subdirectory(myApp) # Include App framework
+add_subdirectory(anotherApp) # Include App framework
 add_subdirectory(vendor) # include third party libraries

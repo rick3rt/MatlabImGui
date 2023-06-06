@@ -1,8 +1,12 @@
-#include "App.hpp"
+#include "Application.hpp"
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_internal.h"
+
+#define USE_IMGUI 0
+
+#include <iostream>
 #include <stdio.h>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
@@ -149,8 +153,9 @@ App::App(std::string title, int w, int h, int argc, char const *argv[])
     // GL 3.0 + GLSL 130
     const char *glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
@@ -159,17 +164,25 @@ App::App(std::string title, int w, int h, int argc, char const *argv[])
     if (Window == NULL)
     {
         fprintf(stderr, "Failed to initialize GLFW window!\n");
+        glfwTerminate();
         abort();
     }
     glfwMakeContextCurrent(Window);
 
-    // init glew ( not needed? )
-    // if (GLEW_OK != glewInit()) { abort(); }
-    // while (GLFW_NO_ERROR != glfwGetError(NULL))
-    // ; /* glewInit may cause some OpenGL errors -- flush the error state */
+    // init glew
+    if (GLEW_OK != glewInit()) { abort(); }
+    while (GLFW_NO_ERROR != glfwGetError(NULL))
+    {
+        ; /* glewInit may cause some OpenGL errors -- flush the error state */
+    }
+
+    // Print version on console to see that everything initialized correctly
+    std::cout << "GLFW Version: " << glfwGetVersionString() << std::endl;
+    std::cout << "GLEW Version: " << glGetString(GL_VERSION) << std::endl;
 
     glfwSwapInterval(1); // Enable vsync
 
+#if USE_IMGUI
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -207,55 +220,51 @@ App::App(std::string title, int w, int h, int argc, char const *argv[])
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple
-    // fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the
-    // font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in
-    // your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture
-    // when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below
-    // will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher
-    // quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to
-    // write a double backslash \\ ! io.Fonts->AddFontDefault();
-    // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     io.Fonts->AddFontFromFileTTF("resource/fonts/Roboto-Medium.ttf", 16.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
-    // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
+#endif
 }
 
 App::~App()
 {
+#if USE_IMGUI
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
     // ImPlot::DestroyContext();
     ImGui::DestroyContext();
-
+#endif
     glfwDestroyWindow(Window);
     glfwTerminate();
+
+    // if (this->sceneBuffer) { delete this->sceneBuffer; }
 }
 
 void App::Run()
 {
     Start();
+
     // Main loop
     while (!glfwWindowShouldClose(Window))
     {
         glfwPollEvents();
+
+        // glClear(GL_COLOR_BUFFER_BIT);
+        // glBegin(GL_TRIANGLES);
+        // glVertex2f(-0.5f, -0.5f);
+        // glVertex2f(0.0f, 0.5f);
+        // glVertex2f(0.5f, -0.5f);
+        // glEnd();
+
+#if USE_IMGUI
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport(); // allow docking in main viewport
-
+#endif
         // update loop
         Update();
+#if USE_IMGUI
 
         // Rendering
         ImGui::Render();
@@ -278,10 +287,30 @@ void App::Run()
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
         }
-
+#endif
         glfwSwapBuffers(Window);
     }
 }
+
+// void App::RenderViewport()
+// {
+//     ImGui::Begin("Scene");
+//     {
+//         ImGui::BeginChild("GameRender");
+
+//         float width = ImGui::GetContentRegionAvail().x;
+//         float height = ImGui::GetContentRegionAvail().y;
+
+//         // *m_width = width;
+//         // *m_height = height;
+
+//         // ImGui::Image((ImTextureID)sceneBuffer->getFrameTexture(),
+//         ImGui::GetContentRegionAvail(),
+//         //              ImVec2(0, 1), ImVec2(1, 0));
+//     }
+//     ImGui::EndChild();
+//     ImGui::End();
+// }
 
 ImVec2 App::GetWindowSize() const
 {

@@ -1,15 +1,25 @@
 project(myApp VERSION 1.0.0 LANGUAGES CXX)
 
 # find_package(OpenMP 2.0 REQUIRED)
+set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/resource")
 
 # define sources for myApp
 set(SRCS_TO_BUILD
     ${PROJECT_SOURCE_DIR}/src/main.cpp
-    ${PROJECT_SOURCE_DIR}/src/App.cpp
-    ${PROJECT_SOURCE_DIR}/src/Demo.cpp
+
+    # ${PROJECT_SOURCE_DIR}/src/Application.cpp
+    ${PROJECT_SOURCE_DIR}/src/Renderer.cpp
+    ${PROJECT_SOURCE_DIR}/src/VertexBuffer.cpp
+    ${PROJECT_SOURCE_DIR}/src/IndexBuffer.cpp
+    ${PROJECT_SOURCE_DIR}/src/VertexArray.cpp
+    ${PROJECT_SOURCE_DIR}/src/Shader.cpp
     ${PROJECT_SOURCE_DIR}/src/image_helper.cpp
+
+    # ${PROJECT_SOURCE_DIR}/src/Demo.cpp
     ${VENDOR_PATH}/imgui/backends/imgui_impl_glfw.cpp # imgui backend
     ${VENDOR_PATH}/imgui/backends/imgui_impl_opengl3.cpp # imgui backend
+
+    # ${PROJECT_SOURCE_DIR}/src/FrameBuffer.cpp
 )
 
 # Create the executable
