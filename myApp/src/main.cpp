@@ -6,6 +6,7 @@
 
 #include "IndexBuffer.hpp"
 #include "Shader.hpp"
+#include "Texture.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferLayout.hpp"
@@ -54,17 +55,15 @@ int main()
 
     // =========
     float positions[] = {
-        -0.5f, -0.5f, // 0
-        0.5f,  -0.5f, // 1
-        0.5f,  0.5f,  // 2
-        -0.5f, 0.5f,  // 3
-        1.0f,  1.0f,  // 4
+        -0.5f, -0.5f, 0.0f, 0.0f, // 0
+        0.5f,  -0.5f, 1.0f, 0.0f, // 1
+        0.5f,  0.5f,  1.0f, 1.0f, // 2
+        -0.5f, 0.5f,  0.0f, 1.0f, // 3
     };
 
     unsigned int indices[] = {
         0, 1, 2, // triangle 1
         2, 3, 0, // triangle 2
-        0, 1, 4, // t3
     };
 
     // float triangle_colors[] = {
@@ -73,11 +72,16 @@ int main()
     //     1.0, 0.0, 0.0, // rgb
     // };
 
+    // texture alpha blending
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
     {
         VertexArray m_va; // vertex array that will hold vertex buffer and their attributes
         VertexBuffer m_vb(positions, sizeof(positions)); // size in bytes
         VertexBufferLayout m_layout;
-        m_layout.Push<float>(2);
+        m_layout.Push<float>(2); // position coordinates
+        m_layout.Push<float>(2); // texture coordinates
         m_va.AddBuffer(m_vb, m_layout);
 
         // VertexBuffer m_vb_colors(triangle_colors, sizeof(float) * 9);
@@ -87,9 +91,13 @@ int main()
 
         IndexBuffer m_ib(indices, sizeof(indices) / sizeof(unsigned int));
 
-        Shader shader("resource/shader/triangle.shader");
+        Shader shader("resource/shader/texture.shader");
         shader.Bind();
-        // shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+        shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+
+        Texture texture("resource/textures/small_alpha.png");
+        texture.Bind(0);
+        shader.SetUniform1i("u_Texture", 0);
 
         Renderer renderer;
 
@@ -112,9 +120,10 @@ int main()
             renderer.Clear();
             // bind shader and set uniform
             shader.Bind();
-            shader.SetUniform4f("u_Color", r, 0.3f, 0.8, 1.0f);
+            // shader.SetUniform4f("u_Color", r, 0.3f, 0.8, 1.0f);
             // draw vertexarray and indexbuffer using shader
             renderer.Draw(m_va, m_ib, shader);
+
             // update r
             if (r > 1.0f)
                 increment = -0.05f;

@@ -13,6 +13,7 @@ set(SRCS_TO_BUILD
     ${PROJECT_SOURCE_DIR}/src/IndexBuffer.cpp
     ${PROJECT_SOURCE_DIR}/src/VertexArray.cpp
     ${PROJECT_SOURCE_DIR}/src/Shader.cpp
+    ${PROJECT_SOURCE_DIR}/src/Texture.cpp
     ${PROJECT_SOURCE_DIR}/src/image_helper.cpp
 
     # ${PROJECT_SOURCE_DIR}/src/Demo.cpp

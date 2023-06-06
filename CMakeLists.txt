@@ -37,5 +37,4 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
 
 # ########################################################################################
 add_subdirectory(myApp) # Include App framework
-add_subdirectory(anotherApp) # Include App framework
 add_subdirectory(vendor) # include third party libraries
