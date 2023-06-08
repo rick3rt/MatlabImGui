@@ -139,24 +139,28 @@ void App::Run()
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport(); // allow docking in main viewport
 
-        // update loop
-        UpdateUI();
+        // UpdateUI(); // update loop of app
+        {
+            ImGui::Begin("test");
+            ImGui::Button("test");
+            ImGui::Button("test");
+            ImGui::End();
+        }
 
         ImGui::Begin("My Scene");
         const float window_width = ImGui::GetContentRegionAvail().x;
         const float window_height = ImGui::GetContentRegionAvail().y;
 
-        m_FrameBuffer->RescaleFrameBuffer(window_width, window_height);
-        glViewport(0, 0, window_width, window_height);
+        // m_FrameBuffer->RescaleFrameBuffer(window_width, window_height);
+        // GLCall(glViewport(0, 0, window_width, window_height));
 
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImGui::GetWindowDrawList()->AddImage(
             (void *)m_FrameBuffer->getFrameTexture(), ImVec2(pos.x, pos.y),
             ImVec2(pos.x + window_width, pos.y + window_height), ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
 
-        // Rendering
-        ImGui::Render();
+        ImGui::End();
+        ImGui::Render(); // Rendering ImGui before openGL render calls
 
         m_FrameBuffer->Bind();
         UpdateGL();
