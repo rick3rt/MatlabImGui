@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 
-// #include "FrameBuffer.hpp"
+#include "FrameBuffer.hpp"
 
 /// Macro to disable console on Windows
 // #if defined(_WIN32) && defined(APP_NO_CONSOLE)
@@ -27,13 +27,17 @@ class App
     // Called at top of run
     virtual void Start() {}
     // Update, called once per frame.
-    virtual void Update() {}
+    virtual void UpdateUI() {}
+    virtual void UpdateGL() {}
+
     // Runs the app.
     void Run();
 
     // Get window size
     ImVec2 GetWindowSize() const;
 
+  private:
+    FrameBuffer *m_FrameBuffer;
     ImVec4 ClearColor;                     // background clear color
     GLFWwindow *Window;                    // GLFW window handle
     std::map<std::string, ImFont *> Fonts; // font map

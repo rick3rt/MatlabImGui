@@ -1,16 +1,140 @@
+#define TEST_CASE_1
+
+#ifdef TEST_CASE_1
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#include "Renderer.hpp"
-
+#include "Application.hpp"
 #include "IndexBuffer.hpp"
+#include "Renderer.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferLayout.hpp"
 
+// some data
+float positions[] = {
+    -0.5f, -0.5f, 0.0f, 0.0f, // 0
+    0.5f,  -0.5f, 1.0f, 0.0f, // 1
+    0.5f,  0.5f,  1.0f, 1.0f, // 2
+    -0.5f, 0.5f,  0.0f, 1.0f, // 3
+};
+
+unsigned int indices[] = {
+    0, 1, 2, // triangle 1
+    2, 3, 0, // triangle 2
+};
+
+class Demo : public App
+{
+  private:
+    VertexArray *m_va;
+    VertexBuffer *m_vb;
+    IndexBuffer *m_ib;
+    VertexBufferLayout *m_layout;
+    Shader *m_shader;
+    Texture *m_texture;
+    Renderer *m_renderer;
+
+    float r = 0.0f;
+    float increment = 0.05f;
+
+  public:
+    using App::App;
+
+    ~Demo();
+
+    // will run during initialization
+    void Start() override;
+
+    // display loop
+    void UpdateUI() override;
+    void UpdateGL() override;
+};
+
+void Demo::Start()
+{
+
+    m_va = new VertexArray();
+    m_vb = new VertexBuffer(positions, sizeof(positions));
+    m_ib = new IndexBuffer(indices, sizeof(indices) / sizeof(unsigned int));
+    m_layout = new VertexBufferLayout();
+    m_shader = new Shader("resource/shader/texture.shader");
+    m_texture = new Texture("resource/textures/small_alpha.png");
+    m_renderer = new Renderer();
+
+    m_layout->Push<float>(2); // position coordinates
+    m_layout->Push<float>(2); // texture coordinates
+    m_va->AddBuffer(*m_vb, *m_layout);
+
+    m_shader->Bind();
+    m_shader->SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+    m_texture->Bind(0);
+    m_shader->SetUniform1i("u_Texture", 0);
+}
+
+void Demo::UpdateUI()
+{
+
+    ImGui::Begin("test");
+    ImGui::Button("test");
+    ImGui::Button("test");
+    ImGui::End();
+
+    // bind_framebuffer();
+
+    // glUseProgram(shader);
+    // glBindVertexArray(VAO);
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
+    // glBindVertexArray(0);
+    // glUseProgram(0);
+
+    // unbind_framebuffer();
+}
+void Demo::UpdateGL()
+{
+
+    // clear screen
+    m_renderer->Clear();
+    // bind shader and set uniform
+    m_shader->Bind();
+
+    // shader.SetUniform4f("u_Color", r, 0.3f, 0.8, 1.0f);
+
+    // draw vertexarray and indexbuffer using shader
+    m_renderer->Draw(m_va, m_ib, m_shader);
+
+    // update r
+    if (r > 1.0f)
+        increment = -0.05f;
+    else if (r < 0.0f)
+        increment = 0.05f;
+    r += increment;
+}
+Demo::~Demo()
+{
+    if (m_va) { delete m_va; }
+    if (m_vb) { delete m_vb; }
+    if (m_ib) { delete m_ib; }
+    if (m_layout) { delete m_layout; }
+    if (m_shader) { delete m_shader; }
+    if (m_texture) { delete m_texture; }
+    if (m_renderer) { delete m_renderer; }
+}
+
+int main(int argc, char const *argv[])
+{
+    Demo app("Demo App", 1280, 760, argc, argv);
+    app.Run();
+
+    return 0;
+}
+
+#endif
+
+#if 0
 const unsigned int width = 1280;
 const unsigned int height = 720;
 const char title[] = "test";
@@ -144,23 +268,10 @@ int main()
 
     return 0;
 }
-
-// =============================================================================
-#if 0
-#include "Demo.hpp"
-#include <iostream>
-
-int main(int argc, char const *argv[])
-{
-    Demo app("Demo App", 1280, 760, argc, argv);
-    app.Run();
-
-    return 0;
-}
-
 #endif
 // =============================================================================
-#if 0
+// =============================================================================
+#ifdef TEST_CASE_2
 
 #include <GL\glew.h>
 
@@ -402,6 +513,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         ImGui::NewFrame();
+        ImGui::DockSpaceOverViewport(); // allow docking in main viewport
+
+        ImGui::Begin("test");
+        ImGui::Button("haha");
+        ImGui::End();
+
         ImGui::Begin("My Scene");
 
         const float window_width = ImGui::GetContentRegionAvail().x;
