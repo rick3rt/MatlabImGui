@@ -23,7 +23,7 @@ FrameBuffer::FrameBuffer(float width, float height)
                                      rbo));
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
 
     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     GLCall(glBindTexture(GL_TEXTURE_2D, 0));
@@ -41,6 +41,8 @@ unsigned int FrameBuffer::getFrameTexture() { return texture; }
 
 void FrameBuffer::RescaleFrameBuffer(float width, float height)
 {
+    std::cout << "FRAMEBUFFER RESCALE: " << width << ", " << height << std::endl;
+
     Bind();
     GLCall(glBindTexture(GL_TEXTURE_2D, texture));
     GLCall(

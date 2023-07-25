@@ -83,11 +83,11 @@ App::App(std::string title, int w, int h, int argc, char const *argv[])
     // io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
-    // ImGui::StyleColorsDark();
+    ImGui::StyleColorsDark();
     // ImPlot::StyleColorsDark();
     // ImGui::StyleColorsLight();
-    ClearColor = ImVec4(0.15f, 0.16f, 0.21f, 1.00f);
-    StyeColorsApp();
+    // ClearColor = ImVec4(0.15f, 0.16f, 0.21f, 1.00f);
+    // StyeColorsApp();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look
     // identical to regular ones.
@@ -147,22 +147,22 @@ void App::Run()
             ImGui::End();
         }
 
-        ImGui::Begin("My Scene");
+        ImGui::Begin("OpenGL");
         const float window_width = ImGui::GetContentRegionAvail().x;
         const float window_height = ImGui::GetContentRegionAvail().y;
-
-        // m_FrameBuffer->RescaleFrameBuffer(window_width, window_height);
-        // GLCall(glViewport(0, 0, window_width, window_height));
 
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImGui::GetWindowDrawList()->AddImage(
             (void *)m_FrameBuffer->getFrameTexture(), ImVec2(pos.x, pos.y),
             ImVec2(pos.x + window_width, pos.y + window_height), ImVec2(0, 1), ImVec2(1, 0));
-
+        // std::cout << "Pos: " << pos.x << "    " << pos.y << std::endl;
         ImGui::End();
         ImGui::Render(); // Rendering ImGui before openGL render calls
 
+        // render framebuffer
         m_FrameBuffer->Bind();
+        m_FrameBuffer->RescaleFrameBuffer(window_width, window_height);
+        GLCall(glViewport(0, 0, window_width, window_height));
         UpdateGL();
         m_FrameBuffer->Unbind();
 

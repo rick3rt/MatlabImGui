@@ -1,4 +1,4 @@
-#define TEST_CASE_3
+#define TEST_CASE_1
 
 #ifdef TEST_CASE_1
 #include <GL/glew.h>
@@ -857,9 +857,12 @@ int main()
 
         ImVec2 pos = ImGui::GetCursorScreenPos();
 
-        ImGui::GetWindowDrawList()->AddImage((void *)texture_id, ImVec2(pos.x, pos.y),
-                                             ImVec2(pos.x + window_width, pos.y + window_height),
-                                             ImVec2(0, 1), ImVec2(1, 0));
+        // ImGui::GetWindowDrawList()->AddImage((void *)texture_id, ImVec2(pos.x, pos.y),
+        //                                      ImVec2(pos.x + window_width, pos.y + window_height),
+        //                                      ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::GetWindowDrawList()->AddImage(
+            (void *)m_FrameBuffer.getFrameTexture(), ImVec2(pos.x, pos.y),
+            ImVec2(pos.x + window_width, pos.y + window_height), ImVec2(0, 1), ImVec2(1, 0));
 
         ImGui::End();
         ImGui::Render();
