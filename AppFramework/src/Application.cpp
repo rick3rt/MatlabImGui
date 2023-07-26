@@ -99,9 +99,6 @@ App::App(std::string title, int w, int h, int argc, char const *argv[])
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(Window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
-
-    // Load Fonts
-    io.Fonts->AddFontFromFileTTF("resource/fonts/Roboto-Medium.ttf", 16.0f);
 }
 
 App::~App()
@@ -139,24 +136,31 @@ void App::Run()
 
         UpdateUI(); // UI update loop of app
 
-        ImGui::Begin("OpenGL");
-        const float window_width = ImGui::GetContentRegionAvail().x;
-        const float window_height = ImGui::GetContentRegionAvail().y;
-        m_FrameBuffer->RescaleFrameBuffer(window_width, window_height);
-        glViewport(0, 0, window_width, window_height);
+        bool opengl_active = ImGui::Begin("OpenGL");
+        if (opengl_active)
+        {
+            const float window_width = ImGui::GetContentRegionAvail().x;
+            const float window_height = ImGui::GetContentRegionAvail().y;
+            m_FrameBuffer->RescaleFrameBuffer(window_width, window_height);
+            glViewport(0, 0, window_width, window_height);
 
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        unsigned int texture_id = m_FrameBuffer->getFrameTexture();
-        ImGui::GetWindowDrawList()->AddImage((void *)texture_id, ImVec2(pos.x, pos.y),
-                                             ImVec2(pos.x + window_width, pos.y + window_height),
-                                             ImVec2(0, 1), ImVec2(1, 0));
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            unsigned int texture_id = m_FrameBuffer->getFrameTexture();
+            ImGui::GetWindowDrawList()->AddImage((void *)texture_id, ImVec2(pos.x, pos.y),
+                                                 ImVec2(pos.x + window_width, pos.y + window_height),
+                                                 ImVec2(0, 1), ImVec2(1, 0));
+        }
         ImGui::End();
+
         ImGui::Render(); // Rendering ImGui before openGL render calls
 
         // render framebuffer
-        m_FrameBuffer->Bind();
-        UpdateGL(); // opengl update loop of app
-        m_FrameBuffer->Unbind();
+        if (opengl_active)
+        {
+            m_FrameBuffer->Bind();
+            UpdateGL(); // opengl update loop of app
+            m_FrameBuffer->Unbind();
+        }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         ImGuiIO &io = ImGui::GetIO();
@@ -177,4 +181,10 @@ ImVec2 App::GetWindowSize() const
     int w, h;
     glfwGetWindowSize(Window, &w, &h);
     return ImVec2(w, h);
+}
+
+void App::setFont(std::string fname, float size)
+{
+    ImGuiIO &io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF(fname.c_str(), size);
 }

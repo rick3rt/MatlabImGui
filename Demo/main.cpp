@@ -65,6 +65,8 @@ class Demo : public App
 
 void Demo::Start()
 {
+    // configure font
+    // this->setFont("resource/fonts/Roboto-Medium.ttf", 14.0f);
 
     m_va = new VertexArray();
     m_vb = new VertexBuffer(pos, sizeof(pos));

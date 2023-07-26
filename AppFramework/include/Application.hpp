@@ -33,15 +33,16 @@ class App
     // Runs the app.
     void Run();
 
+    // Set App font
+    void setFont(std::string fname, float size);
+
     // Get window size
     ImVec2 GetWindowSize() const;
 
   private:
     FrameBuffer *m_FrameBuffer;
-    ImVec4 ClearColor;                     // background clear color
-    GLFWwindow *Window;                    // GLFW window handle
-    std::map<std::string, ImFont *> Fonts; // font map
-    bool UsingDGPU;                        // using discrete gpu (laptops only)
+    ImVec4 ClearColor;  // background clear color
+    GLFWwindow *Window; // GLFW window handle
 };
 
 #endif //! APPLICATION_HPP_
