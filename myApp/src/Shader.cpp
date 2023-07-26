@@ -74,8 +74,7 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string &source)
     return id;
 }
 
-unsigned int Shader::CreateShader(const std::string &vertexShader,
-                                  const std::string &fragmentShader)
+unsigned int Shader::CreateShader(const std::string &vertexShader, const std::string &fragmentShader)
 {
     unsigned int program = glCreateProgram();
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
@@ -113,8 +112,7 @@ int Shader::GetUniformLocation(const std::string &name)
         return m_UniformLocationCache[name];
 
     GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
-    if (location == -1)
-        std::cout << "Warning! uniform '" << name << "' doesn't exist!" << std::endl;
+    if (location == -1) std::cout << "Warning! uniform '" << name << "' doesn't exist!" << std::endl;
     m_UniformLocationCache[name] = location;
     return location;
 }

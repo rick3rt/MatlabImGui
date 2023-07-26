@@ -16,15 +16,23 @@
 
 // some data
 float positions[] = {
-    -0.5f, -0.5f, 0.0f, 0.0f, // 0
-    0.5f,  -0.5f, 1.0f, 0.0f, // 1
-    0.5f,  0.5f,  1.0f, 1.0f, // 2
-    -0.5f, 0.5f,  0.0f, 1.0f, // 3
+    -0.5f, -0.5f, // 0
+    0.5f,  -0.5f, // 1
+    0.5f,  0.5f,  // 2
+    -0.5f, 0.5f   // 3
 };
-
-unsigned int indices[] = {
+unsigned int indices[] = {0, 1, 2}; //, 2, 3, 0};
+float pos[]{
+    -0.5000, -0.5500, // 0
+    0.5000,  -0.5500, // 1
+    0.5000,  0.4500,  // 2
+    0.5000,  0.5500,  // 3
+    -0.5000, -0.4500, // 4
+    -0.5000, 0.5500,  // 5
+};
+unsigned int ind[] = {
     0, 1, 2, // triangle 1
-    2, 3, 0, // triangle 2
+    3, 4, 5, // triangle 2
 };
 
 class Demo : public App
@@ -40,6 +48,7 @@ class Demo : public App
 
     float r = 0.0f;
     float increment = 0.05f;
+    ImVec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 
   public:
     using App::App;
@@ -58,61 +67,56 @@ void Demo::Start()
 {
 
     m_va = new VertexArray();
-    m_vb = new VertexBuffer(positions, sizeof(positions));
-    m_ib = new IndexBuffer(indices, sizeof(indices) / sizeof(unsigned int));
+    m_vb = new VertexBuffer(pos, sizeof(pos));
+    m_ib = new IndexBuffer(ind, sizeof(ind) / sizeof(unsigned int));
+
     m_layout = new VertexBufferLayout();
-    m_shader = new Shader("resource/shader/texture.shader");
-    m_texture = new Texture("resource/textures/small_alpha.png");
+    m_shader = new Shader("resource/shader/basic.shader");
+    // m_texture = new Texture("resource/textures/small_alpha.png");
     m_renderer = new Renderer();
 
     m_layout->Push<float>(2); // position coordinates
-    m_layout->Push<float>(2); // texture coordinates
+    // m_layout->Push<float>(2); // texture coordinates
     m_va->AddBuffer(*m_vb, *m_layout);
 
     m_shader->Bind();
-    m_shader->SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
-    m_texture->Bind(0);
-    m_shader->SetUniform1i("u_Texture", 0);
+    m_shader->SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
+    // m_texture->Bind(0);
+    // m_shader->SetUniform1i("u_Texture", 0);
 }
 
 void Demo::UpdateUI()
 {
+    if (ImGui::Begin("UI"))
+    {
+        ImGui::Text("Both types:");
+        float w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y) * 0.50f;
+        ImGui::ColorPicker4("##MyColor##5", (float *)&color,
+                            ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_NoSidePreview |
+                                ImGuiColorEditFlags_AlphaBar);
 
-    ImGui::Begin("test");
-    ImGui::Button("test");
-    ImGui::Button("test");
-    ImGui::End();
+        w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y) * 0.25;
+        if (ImGui::Button("Red", ImVec2(w, 0))) { color = {1.0f, 0.0f, 0.0f, 1.0f}; }
+        ImGui::SameLine();
+        if (ImGui::Button("Green", ImVec2(w, 0))) { color = {0.0f, 0.0f, 1.0f, 1.0f}; }
+        ImGui::SameLine();
+        if (ImGui::Button("Blue", ImVec2(w, 0))) { color = {0.0f, 1.0f, 0.0f, 1.0f}; }
 
-    // bind_framebuffer();
+        ImGui::End();
+    }
 
-    // glUseProgram(shader);
-    // glBindVertexArray(VAO);
-    // glDrawArrays(GL_TRIANGLES, 0, 3);
-    // glBindVertexArray(0);
-    // glUseProgram(0);
-
-    // unbind_framebuffer();
+    ImGui::ShowDemoWindow();
+    // ImGui::ShowDebugLogWindow();
 }
+
 void Demo::UpdateGL()
 {
-
-    // clear screen
-    m_renderer->Clear();
-    // bind shader and set uniform
-    m_shader->Bind();
-
-    // shader.SetUniform4f("u_Color", r, 0.3f, 0.8, 1.0f);
-
-    // draw vertexarray and indexbuffer using shader
-    m_renderer->Draw(m_va, m_ib, m_shader);
-
-    // update r
-    if (r > 1.0f)
-        increment = -0.05f;
-    else if (r < 0.0f)
-        increment = 0.05f;
-    r += increment;
+    m_renderer->Clear();                                                   // clear screen
+    m_shader->Bind();                                                      // bind shader and set uniform
+    m_shader->SetUniform4f("u_Color", color.x, color.y, color.z, color.w); // set drawing color
+    m_renderer->Draw(m_va, m_ib, m_shader); // draw vertexarray and indexbuffer using shader
 }
+
 Demo::~Demo()
 {
     if (m_va) { delete m_va; }
@@ -120,7 +124,7 @@ Demo::~Demo()
     if (m_ib) { delete m_ib; }
     if (m_layout) { delete m_layout; }
     if (m_shader) { delete m_shader; }
-    if (m_texture) { delete m_texture; }
+    // if (m_texture) { delete m_texture; }
     if (m_renderer) { delete m_renderer; }
 }
 
@@ -128,13 +132,25 @@ int main(int argc, char const *argv[])
 {
     Demo app("Demo App", 1280, 760, argc, argv);
     app.Run();
-
     return 0;
 }
 
 #endif
 
-#if 0
+#ifdef TEST_CASE_2
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
+
+#include "Application.hpp"
+#include "IndexBuffer.hpp"
+#include "Renderer.hpp"
+#include "Shader.hpp"
+#include "Texture.hpp"
+#include "VertexArray.hpp"
+#include "VertexBuffer.hpp"
+#include "VertexBufferLayout.hpp"
+
 const unsigned int width = 1280;
 const unsigned int height = 720;
 const char title[] = "test";
@@ -270,640 +286,124 @@ int main()
 }
 #endif
 // =============================================================================
-// =============================================================================
-#ifdef TEST_CASE_2
-
-#include <GL\glew.h>
-
-#include <GLFW\glfw3.h>
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
-#include <iostream>
-#include <string>
-
-const GLint WIDTH = 800;
-const GLint HEIGHT = 600;
-
-GLuint VAO;
-GLuint VBO;
-GLuint FBO;
-GLuint RBO;
-GLuint texture_id;
-GLuint shader;
-
-const char *vertex_shader_code = R"*(
-#version 330
-
-layout (location = 0) in vec3 pos;
-
-void main()
-{
-	gl_Position = vec4(0.9*pos.x, 0.9*pos.y, 0.5*pos.z, 1.0);
-}
-)*";
-
-const char *fragment_shader_code = R"*(
-#version 330
-
-out vec4 color;
-
-void main()
-{
-	color = vec4(0.0, 1.0, 0.0, 1.0);
-}
-)*";
-
-void create_triangle()
-{
-    GLfloat vertices[] = {
-        -1.0f, -1.0f, 0.0f, // 1. vertex x, y, z
-        1.0f,  -1.0f, 0.0f, // 2. vertex ...
-        0.0f,  1.0f,  0.0f  // etc...
-    };
-
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void add_shader(GLuint program, const char *shader_code, GLenum type)
-{
-    GLuint current_shader = glCreateShader(type);
-
-    const GLchar *code[1];
-    code[0] = shader_code;
-
-    GLint code_length[1];
-    code_length[0] = strlen(shader_code);
-
-    glShaderSource(current_shader, 1, code, code_length);
-    glCompileShader(current_shader);
-
-    GLint result = 0;
-    GLchar log[1024] = {0};
-
-    glGetShaderiv(current_shader, GL_COMPILE_STATUS, &result);
-    if (!result)
-    {
-        glGetShaderInfoLog(current_shader, sizeof(log), NULL, log);
-        std::cout << "Error compiling " << type << " shader: " << log << "\n";
-        return;
-    }
-
-    glAttachShader(program, current_shader);
-}
-
-void create_shaders()
-{
-    shader = glCreateProgram();
-    if (!shader)
-    {
-        std::cout << "Error creating shader program!\n";
-        exit(1);
-    }
-
-    add_shader(shader, vertex_shader_code, GL_VERTEX_SHADER);
-    add_shader(shader, fragment_shader_code, GL_FRAGMENT_SHADER);
-
-    GLint result = 0;
-    GLchar log[1024] = {0};
-
-    glLinkProgram(shader);
-    glGetProgramiv(shader, GL_LINK_STATUS, &result);
-    if (!result)
-    {
-        glGetProgramInfoLog(shader, sizeof(log), NULL, log);
-        std::cout << "Error linking program:\n" << log << '\n';
-        return;
-    }
-
-    glValidateProgram(shader);
-    glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);
-    if (!result)
-    {
-        glGetProgramInfoLog(shader, sizeof(log), NULL, log);
-        std::cout << "Error validating program:\n" << log << '\n';
-        return;
-    }
-}
-
-void create_framebuffer()
-{
-    glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
-
-    glGenRenderbuffers(1, &RBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-}
-
-void bind_framebuffer() { glBindFramebuffer(GL_FRAMEBUFFER, FBO); }
-
-void unbind_framebuffer() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
-
-void rescale_framebuffer(float width, float height)
-{
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
-
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-}
-
-int main()
-{
-    if (!glfwInit())
-    {
-        std::cout << "GLFW initialisation failed!\n";
-        glfwTerminate();
-        return 1;
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    // Create the window
-    GLFWwindow *mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "My Window", NULL, NULL);
-    if (!mainWindow)
-    {
-        std::cout << "GLFW creation failed!\n";
-        glfwTerminate();
-        return 1;
-    }
-
-    int bufferWidth, bufferHeight;
-    glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-    glfwMakeContextCurrent(mainWindow);
-    glewExperimental = GL_TRUE;
-
-    if (glewInit() != GLEW_OK)
-    {
-        std::cout << "glew initialisation failed!\n";
-        glfwDestroyWindow(mainWindow);
-        glfwTerminate();
-        return 1;
-    }
-
-    glViewport(0, 0, bufferWidth, bufferHeight);
-
-    create_triangle();
-    create_shaders();
-    create_framebuffer();
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-    ImGui::StyleColorsDark();
-    ImGuiStyle &style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    ImGui_ImplGlfw_InitForOpenGL(mainWindow, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
-
-    while (!glfwWindowShouldClose(mainWindow))
-    {
-        glfwPollEvents();
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport(); // allow docking in main viewport
-
-        ImGui::Begin("test");
-        ImGui::Button("haha");
-        ImGui::End();
-
-        ImGui::Begin("My Scene");
-
-        const float window_width = ImGui::GetContentRegionAvail().x;
-        const float window_height = ImGui::GetContentRegionAvail().y;
-
-        rescale_framebuffer(window_width, window_height);
-        glViewport(0, 0, window_width, window_height);
-
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-
-        ImGui::GetWindowDrawList()->AddImage((void *)texture_id, ImVec2(pos.x, pos.y),
-                                             ImVec2(pos.x + window_width, pos.y + window_height),
-                                             ImVec2(0, 1), ImVec2(1, 0));
-
-        ImGui::End();
-        ImGui::Render();
-
-        bind_framebuffer();
-
-        glUseProgram(shader);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
-        glUseProgram(0);
-
-        unbind_framebuffer();
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            GLFWwindow *backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
-        }
-
-        glfwSwapBuffers(mainWindow);
-    }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    glDeleteFramebuffers(1, &FBO);
-    glDeleteTextures(1, &texture_id);
-    glDeleteRenderbuffers(1, &RBO);
-
-    glfwDestroyWindow(mainWindow);
-    glfwTerminate();
-
-    return 0;
-}
-
-#endif
-
-// =============================================================================
 #ifdef TEST_CASE_3
+// Include GLEW
+#include <GL/glew.h>
 
-#include <GL\glew.h>
-
-#include <GLFW\glfw3.h>
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+// Include GLFW
+#include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <string>
 
-const GLint WIDTH = 800;
-const GLint HEIGHT = 600;
-
-GLuint VAO;
-GLuint VBO;
-GLuint FBO;
-GLuint RBO;
-GLuint texture_id;
-GLuint shader;
-
-const char *vertex_shader_code = R"*(
-#version 330
-
-layout (location = 0) in vec3 pos;
-
-void main()
-{
-	gl_Position = vec4(0.9*pos.x, 0.9*pos.y, 0.5*pos.z, 1.0);
-}
-)*";
-
-const char *fragment_shader_code = R"*(
-#version 330
-
-out vec4 color;
-
-void main()
-{
-	color = vec4(0.0, 1.0, 0.0, 1.0);
-}
-)*";
-
+#include "IndexBuffer.hpp"
 #include "Renderer.hpp"
+#include "Shader.hpp"
+#include "VertexArray.hpp"
+#include "VertexBuffer.hpp"
+#include "VertexBufferLayout.hpp"
 
-#define ASSERT(x)                                                                                  \
-    if (!(x)) __debugbreak()
-
-#define GLCall(x)                                                                                  \
-    GLClearError();                                                                                \
-    x;                                                                                             \
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-void create_triangle()
+GLFWwindow *InitWindow()
 {
-
-    GLfloat vertices[] = {
-        -1.0f, -1.0f, 0.0f, // 1. vertex x, y, z
-        1.0f,  -1.0f, 0.0f, // 2. vertex ...
-        0.0f,  1.0f,  0.0f  // etc...
-    };
-
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void add_shader(GLuint program, const char *shader_code, GLenum type)
-{
-    GLuint current_shader = glCreateShader(type);
-
-    const GLchar *code[1];
-    code[0] = shader_code;
-
-    GLint code_length[1];
-    code_length[0] = strlen(shader_code);
-
-    glShaderSource(current_shader, 1, code, code_length);
-    glCompileShader(current_shader);
-
-    GLint result = 0;
-    GLchar log[1024] = {0};
-
-    glGetShaderiv(current_shader, GL_COMPILE_STATUS, &result);
-    if (!result)
-    {
-        glGetShaderInfoLog(current_shader, sizeof(log), NULL, log);
-        std::cout << "Error compiling " << type << " shader: " << log << "\n";
-        return;
-    }
-
-    glAttachShader(program, current_shader);
-}
-
-void create_shaders()
-{
-    shader = glCreateProgram();
-    if (!shader)
-    {
-        std::cout << "Error creating shader program!\n";
-        exit(1);
-    }
-
-    add_shader(shader, vertex_shader_code, GL_VERTEX_SHADER);
-    add_shader(shader, fragment_shader_code, GL_FRAGMENT_SHADER);
-
-    GLint result = 0;
-    GLchar log[1024] = {0};
-
-    glLinkProgram(shader);
-    glGetProgramiv(shader, GL_LINK_STATUS, &result);
-    if (!result)
-    {
-        glGetProgramInfoLog(shader, sizeof(log), NULL, log);
-        std::cout << "Error linking program:\n" << log << '\n';
-        return;
-    }
-
-    glValidateProgram(shader);
-    glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);
-    if (!result)
-    {
-        glGetProgramInfoLog(shader, sizeof(log), NULL, log);
-        std::cout << "Error validating program:\n" << log << '\n';
-        return;
-    }
-}
-
-void create_framebuffer()
-{
-    GLCall(glGenFramebuffers(1, &FBO));
-    GLCall(glBindFramebuffer(GL_FRAMEBUFFER, FBO));
-
-    GLCall(glGenTextures(1, &texture_id));
-    GLCall(glBindTexture(GL_TEXTURE_2D, texture_id));
-    GLCall(
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-    GLCall(
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0));
-
-    GLCall(glGenRenderbuffers(1, &RBO));
-    GLCall(glBindRenderbuffer(GL_RENDERBUFFER, RBO));
-    GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT));
-    GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                                     RBO));
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
-
-    GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-    GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-    GLCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
-}
-
-void bind_framebuffer() { GLCall(glBindFramebuffer(GL_FRAMEBUFFER, FBO)); }
-
-void unbind_framebuffer() { GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0)); }
-
-void rescale_framebuffer(float width, float height)
-{
-    bind_framebuffer();
-    GLCall(glBindTexture(GL_TEXTURE_2D, texture_id));
-    GLCall(
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-    GLCall(
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0));
-
-    GLCall(glBindRenderbuffer(GL_RENDERBUFFER, RBO));
-    GLCall(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height));
-    GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                                     RBO));
-    unbind_framebuffer();
-}
-
-#include "FrameBuffer.hpp"
-
-int main()
-{
+    // Initialise GLFW
     if (!glfwInit())
     {
-        std::cout << "GLFW initialisation failed!\n";
-        glfwTerminate();
-        return 1;
+        fprintf(stderr, "Failed to initialize GLFW\n");
+        getchar();
+        return nullptr;
     }
 
+    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    // Create the window
-    GLFWwindow *mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "My Window", NULL, NULL);
-    if (!mainWindow)
+    // Open a window and create its OpenGL context
+    GLFWwindow *window = glfwCreateWindow(1024, 768, "Tutorial 02 - Red triangle", NULL, NULL);
+    if (window == NULL)
     {
-        std::cout << "GLFW creation failed!\n";
+        fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 "
+                        "compatible. Try the 2.1 version of the tutorials.\n");
+        getchar();
         glfwTerminate();
-        return 1;
+        return nullptr;
     }
+    glfwMakeContextCurrent(window);
 
-    int bufferWidth, bufferHeight;
-    glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-    glfwMakeContextCurrent(mainWindow);
-    glewExperimental = GL_TRUE;
-
+    // Initialize GLEW
+    glewExperimental = true; // Needed for core profile
     if (glewInit() != GLEW_OK)
     {
-        std::cout << "glew initialisation failed!\n";
-        glfwDestroyWindow(mainWindow);
+        fprintf(stderr, "Failed to initialize GLEW\n");
+        getchar();
         glfwTerminate();
-        return 1;
+        return nullptr;
     }
 
-    glViewport(0, 0, bufferWidth, bufferHeight);
+    std::cout << "Using GL Version: " << glGetString(GL_VERSION) << std::endl;
 
-    create_triangle();
-    create_shaders();
+    // Ensure we can capture the escape key being pressed below
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    // create_framebuffer();
-    FrameBuffer m_FrameBuffer(bufferWidth, bufferHeight);
+    return window;
+}
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+int main(void)
+{
+    GLFWwindow *window = InitWindow();
+    if (!window) return -1;
 
-    ImGui::StyleColorsDark();
-    ImGuiStyle &style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    float positions[] = {
+        -0.5f, -0.5f, // 0
+        0.5f,  -0.5f, // 1
+        0.5f,  0.5f,  // 2
+        -0.5f, 0.5f   // 3
+    };
+
+    unsigned int indices[] = {0, 1, 2, 2, 3, 0};
+
     {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
+        VertexArray va;
+        VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+        IndexBuffer ib(indices, 6);
 
-    ImGui_ImplGlfw_InitForOpenGL(mainWindow, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
 
-    while (!glfwWindowShouldClose(mainWindow))
-    {
-        glfwPollEvents();
+        va.AddBuffer(vb, layout);
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
+        Shader shader("resource/shader/basic.shader");
+        shader.Bind();
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        float red = 0.0f;
+        float step = 0.01f;
 
-        ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport(); // allow docking in main viewport
+        Renderer renderer;
 
-        ImGui::Begin("test");
-        ImGui::Button("haha");
-        ImGui::End();
-
-        ImGui::Begin("My Scene");
-
-        const float window_width = ImGui::GetContentRegionAvail().x;
-        const float window_height = ImGui::GetContentRegionAvail().y;
-
-        m_FrameBuffer.RescaleFrameBuffer(window_width, window_height);
-        // rescale_framebuffer(window_width, window_height);
-        glViewport(0, 0, window_width, window_height);
-
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-
-        // ImGui::GetWindowDrawList()->AddImage((void *)texture_id, ImVec2(pos.x, pos.y),
-        //                                      ImVec2(pos.x + window_width, pos.y + window_height),
-        //                                      ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::GetWindowDrawList()->AddImage(
-            (void *)m_FrameBuffer.getFrameTexture(), ImVec2(pos.x, pos.y),
-            ImVec2(pos.x + window_width, pos.y + window_height), ImVec2(0, 1), ImVec2(1, 0));
-
-        ImGui::End();
-        ImGui::Render();
-
-        m_FrameBuffer.Bind();
-        // bind_framebuffer();
-
-        glUseProgram(shader);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
-        glUseProgram(0);
-
-        m_FrameBuffer.Unbind();
-        // unbind_framebuffer();
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        do
         {
-            GLFWwindow *backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
-        }
+            renderer.Clear();
 
-        glfwSwapBuffers(mainWindow);
+            shader.Bind();
+            shader.SetUniform4f("u_Color", red, 0.3, 0.8, 1.0);
+
+            renderer.Draw(va, ib, shader);
+
+            // Swap buffers
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+
+            // increment red
+            // if (red < 0.0f || red > 1.0f) step *= -1.0;
+            // red += step;
+
+        } // Check if the ESC key was pressed or the window was closed
+        while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    glDeleteFramebuffers(1, &FBO);
-    glDeleteTextures(1, &texture_id);
-    glDeleteRenderbuffers(1, &RBO);
-
-    glfwDestroyWindow(mainWindow);
+    // Close OpenGL window and terminate GLFW
     glfwTerminate();
 
     return 0;
 }
-
 #endif
-// =============================================================================

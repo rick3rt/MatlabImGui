@@ -15,7 +15,7 @@ AfterUnion: true,
 BeforeCatch: true, 
 # BeforeElse: true 
 }
-ColumnLimit: 100
+ColumnLimit: 105
 AlwaysBreakTemplateDeclarations: Yes
 ---
 ---
