@@ -41,8 +41,9 @@ class App
 
   private:
     FrameBuffer *m_FrameBuffer;
-    ImVec4 ClearColor;  // background clear color
-    GLFWwindow *Window; // GLFW window handle
+    ImVec2 m_openGLSize;
+    // ImVec4 ClearColor;  // background clear color
+    GLFWwindow *m_Window; // GLFW window handle
 };
 
 #endif //! APPLICATION_HPP_

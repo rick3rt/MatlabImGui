@@ -6,6 +6,7 @@ set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/resource")
 # define sources for Demo
 set(SRCS_TO_BUILD
     ${PROJECT_SOURCE_DIR}/main.cpp
+    ${PROJECT_SOURCE_DIR}/Demo.cpp
 )
 
 # Create the executable

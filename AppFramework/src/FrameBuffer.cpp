@@ -4,7 +4,6 @@
 
 FrameBuffer::FrameBuffer(float width, float height)
 {
-    std::cout << "FRAMEBUFFER: " << width << ", " << height << std::endl;
     GLCall(glGenFramebuffers(1, &fbo));
     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, fbo));
 
@@ -39,8 +38,6 @@ unsigned int FrameBuffer::getFrameTexture() { return texture; }
 
 void FrameBuffer::RescaleFrameBuffer(float width, float height)
 {
-    std::cout << "FRAMEBUFFER RESCALE: " << width << ", " << height << std::endl;
-
     Bind();
     GLCall(glBindTexture(GL_TEXTURE_2D, texture));
     GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL));
