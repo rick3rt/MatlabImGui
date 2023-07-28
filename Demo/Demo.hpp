@@ -14,9 +14,11 @@ class Demo : public App
 {
   private:
     VertexArray *m_va;
-    VertexBuffer *m_vb;
+    VertexBuffer *m_vb_pos;
+    VertexBuffer *m_vb_col;
+    VertexBufferLayout *m_layout_pos;
+    VertexBufferLayout *m_layout_col;
     IndexBuffer *m_ib;
-    VertexBufferLayout *m_layout;
     Shader *m_shader;
     Texture *m_texture;
     Renderer *m_renderer;
