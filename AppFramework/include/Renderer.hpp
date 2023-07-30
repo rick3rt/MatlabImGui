@@ -7,12 +7,12 @@
 #include "Shader.hpp"
 #include "VertexArray.hpp"
 
-#define ASSERT(x)                                                                                  \
+#define ASSERT(x)                                                                                       \
     if (!(x)) __debugbreak()
 
-#define GLCall(x)                                                                                  \
-    GLClearError();                                                                                \
-    x;                                                                                             \
+#define GLCall(x)                                                                                       \
+    GLClearError();                                                                                     \
+    x;                                                                                                  \
     ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
 void GLClearError();
@@ -28,6 +28,8 @@ class Renderer
     void Clear() const;
     void Draw(const VertexArray &va, const IndexBuffer &ib, const Shader &shader) const;
     void Draw(const VertexArray *va, const IndexBuffer *ib, const Shader *shader) const;
+
+    void Draw(const VertexArray &va, const Shader &shader, unsigned int num_indices) const;
 };
 
 #endif //! RENDERER_HPP_
