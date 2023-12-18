@@ -93,6 +93,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         app->setRawData(xdata, ydata, size);
     }
 
+    if (strcmp(command, "img") == 0)
+    {
+        if (nrhs != 2)
+        {
+            mexPrintf("Image plotting requires 1 argument: img\n");
+            return;
+        }
+        mexPrintf("Setting data...\n");
+        double *img = mxGetDoubles(prhs[1]);
+        size_t rows = mxGetN(prhs[1]);
+        size_t cols = mxGetM(prhs[1]);
+        app->setImageData(img, rows, cols);
+    }
+
     // check if command is "color"
     if (strcmp(command, "color") == 0)
     {

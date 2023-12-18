@@ -11,9 +11,14 @@ class MatlabApp : public ImGuiApp
     ImageTexture *m_ImageTexture = nullptr;
     std::vector<double> m_XData;
     std::vector<double> m_YData;
+
     double *m_XDataRaw = nullptr;
     double *m_YDataRaw = nullptr;
     size_t m_SizeRaw = 0;
+
+    std::vector<double> m_img;
+    size_t m_img_rows, m_img_cols;
+    size_t m_img_min, m_img_max;
 
   public:
     using ImGuiApp::ImGuiApp;
@@ -30,4 +35,6 @@ class MatlabApp : public ImGuiApp
     void SetColor(float r, float g, float b, float a = 1.0f) { m_Color = {r, g, b, a}; }
     void setData(const double *xdata, const double *ydata, size_t size);
     void setRawData(const double *xdata, const double *ydata, size_t size);
+
+    void setImageData(const double *img, size_t rows, size_t cols);
 };
