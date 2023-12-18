@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 project(CMakeImGuiOpenGL VERSION 1.0.0 LANGUAGES CXX)
 
+
 # ########################################################################################
 # User variables
 set(VENDOR_PATH "${PROJECT_SOURCE_DIR}/vendor")
@@ -37,7 +38,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
 
 # ########################################################################################
 add_subdirectory(vendor) # include third party libraries
-add_subdirectory(AppFramework) # Include App Framework
-add_subdirectory(Demo) # Include Demo App
-
-add_subdirectory(testApp) # Include App framework
+add_subdirectory(ImGuiApp) # Include App Framework
+add_subdirectory(MatlabApp)
+# add_subdirectory(Demo) # Include Demo App
+# add_subdirectory(testApp) # Include App framework
